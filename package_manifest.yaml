@@ -1,0 +1,87 @@
+# grasp_pose_rbnx — gRPC roboarm-style grasp-pose estimator.
+#
+# Pure CPU. No ML model, no GPU, no torch, no legacy /graspnet ROS
+# trigger path. Owns `robonix/service/perception/grasp_pose/*`.
+#
+# The caller must provide bbox_2d. The bbox center pixel is mapped to
+# arm-plane XY through a required 3x3 2D hand-eye homography, gripper
+# yaw is derived from the bbox long edge, and catch_offset is applied
+# to the final grasp point. Depth, camera intrinsics, and hand-eye TF
+# are NOT used by the algorithm.
+#
+# Runtime role:
+#   * SERVER (atlas gRPC): grasp_pose/grasp_request
+#
+# Lifecycle:
+#   on_init       — parse cfg, load homography.
+#   on_deactivate — clear initialized state.
+#
+# Capability surface:
+#   service/perception/grasp_pose/driver         mode=rpc transport=gRPC
+#   service/perception/grasp_pose/grasp_request  mode=rpc transport=gRPC
+#
+# Config (passed via Driver(CMD_INIT, config_json)):
+#
+#   ── REQUIRED roboarm grasp parameters ──
+#   hand_eye_calibration_file   str         path to 3x3 .npy homography
+#                                            mapping pixel [u,v,1] to
+#                                            arm-plane [x,y,1].
+#   homography_matrix           float[3][3] inline alternative to file.
+#   default_desktop_height      float       final grasp z in arm/base_link.
+#
+#   ── Optional roboarm grasp parameters ──
+#   catch_offset                float       default 0.01 — XY offset along
+#                                            computed gripper yaw.
+#   box_rotation_deg            float       default 0.0 — used when bbox_2d
+#                                            has no fifth rotation element.
+#   approach_dist               float       default 0.10  — hover height for
+#                                            pre/post grasp (m). Used by
+#                                            pick_skill_rbnx.
+#   output_frame                str         default arm/base_link — pose output
+#                                            frame consumed by roboarm_ik.
+#
+#   ── Output knobs ──
+#   gripper_width_default       float       default 0.04 — returned to caller
+#
+# config/vertical_grasp.yaml is documentation only; runtime config comes
+# from the deploy manifest.
+# roboarm grasp-pose service — detector bbox (pixels) → arm/base_link pose.
+#
+# VENDORED REPACKAGING — provenance:
+#   upstream:  syswonder/service-grasp-pose-rbnx
+#   revision:  af6618ce15b966e8a4afe3c109b9d014c95d6b75 (main, 2026-09-15)
+#   license:   unchanged — MulanPSL-2.0, exactly as upstream declares it.
+#   why:       the roboarm deploy reuses exactly one catalog package (the
+#              camera) and owns everything else in this repo.
+#
+# LOCAL DIFFERENCES vs upstream (the only two):
+#   * `grasp_mode: flat` — flat-palm grasp-pose generation: heading = palm
+#     bearing + heading_offset_deg, flange = palm + arm_length_m·u(heading),
+#     z fixed at flat_grasp_height_m. Upstream is vertical-only (bbox centre →
+#     homography → yaw from the orientation label, else from the bbox long
+#     edge).
+#   * config.spec — added here; upstream ships none. Documentation only, values
+#     read out of this package's code.
+#   The flat path adds the config keys flat_grasp_height_m,
+#   flat_euler_deg_zyx, heading_offset_deg, arm_length_m and catch_offset.
+#   Everything else is upstream, and `grasp_mode: vertical` still is too.
+manifestVersion: 1
+
+package:
+  name: robonix.service.roboarm.grasp_pose
+  version: 0.1.0
+  vendor: robonix
+  description: Geometric grasp-pose estimator (gRPC) with flat-palm and vertical modes.
+  license: MulanPSL-2.0
+  tags: [service, perception, grasp_pose, grasp, ros2]
+  maintainers:
+    - Joker.Yun <2353493891@qq.com>
+
+capability_id: grasp_pose
+
+build: bash scripts/build.sh
+start: bash scripts/start.sh
+
+capabilities:
+  - name: robonix/service/perception/grasp_pose/driver
+  - name: robonix/service/perception/grasp_pose/grasp_request

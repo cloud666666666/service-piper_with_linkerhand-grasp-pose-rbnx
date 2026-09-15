@@ -1,0 +1,36 @@
+# Compute a grasp pose for a named object inside a caller-supplied 2D ROI.
+#
+# Two models, selected by the `grasp_mode` config key. This deploy uses `flat`.
+#
+# `flat` (default) — LinkerHand O6 flat-palm enveloping grasp:
+#   * bbox center pixel -> PALM point through the 2D homography;
+#   * heading = azimuth(palm) + heading_offset_deg. The wrist is held in the
+#     TAUGHT configuration and only rotated about world z to face the object —
+#     the bbox's long edge is deliberately NOT used (roboarm:
+#     "不再用物体长边角"). The returned quaternion is Rz(heading) @ R_taught,
+#     which is exactly what arm.move_to_flat(rot_rad=heading) builds on the
+#     robot;
+#   * z is `flat_grasp_height_m`, an ABSOLUTE height — NOT
+#     default_desktop_height, which roboarm's config states does not match the
+#     flat-grasp scene;
+#   * `gripper_width` in the response carries the MEASURED object width
+#     (bbox short edge projected onto the palm plane), which is what the hand's
+#     grasp_by_size() interpolates against.
+#
+# `vertical` — the reference deploy's gripper algorithm, retained for
+# comparison: downward pose, gripper yaw from the bbox long edge, z from
+# default_desktop_height.
+#
+# Depth / camera_info / TF are NOT consumed by either model. object_center_3d
+# and retry stay in the IDL for wire compatibility but are ignored.
+#
+# IDL: lib/grasp/srv/GraspRequest.srv (package-local). This package exposes
+# the robonix gRPC path; legacy ROS /graspnet compatibility has been removed.
+[contract]
+id      = "robonix/service/perception/grasp_pose/grasp_request"
+version = "1"
+kind    = "service"
+idl     = "grasp/srv/GraspRequest.srv"
+
+[mode]
+type = "rpc"
