@@ -2,7 +2,7 @@
 
 gRPC geometric grasp-pose estimator for the Piper + Orbbec grasp pipeline.
 
-Catalog name: `robonix.service.roboarm.grasp_pose`.
+Catalog name: `robonix.service.piper_with_linkerhand.grasp_pose`.
 
 > **Provenance — vendored repackaging.** Copied from
 > `syswonder/service-grasp-pose-rbnx` @ `af6618c` (main, 2026-09-15) so the

@@ -68,7 +68,7 @@
 manifestVersion: 1
 
 package:
-  name: robonix.service.roboarm.grasp_pose
+  name: robonix.service.piper_with_linkerhand.grasp_pose
   version: 0.1.0
   vendor: robonix
   description: Geometric grasp-pose estimator (gRPC) with flat-palm and vertical modes.

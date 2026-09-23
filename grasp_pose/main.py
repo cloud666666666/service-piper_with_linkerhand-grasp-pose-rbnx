@@ -60,7 +60,7 @@ def _flat_base_rotation(flat_euler_deg_zyx: list[float]):
     roboarm does (arm/piper_ctrl_by_sdk_flat_hand.py:move_to_flat uses
     `R.from_euler("zyx", self.flat_euler_deg_zyx, degrees=True)`). Verified
     against the reference's own published benchmark — see the module docstring
-    of service-roboarm-ik-rbnx/roboarm_ik/solver.py:solve_flat.
+    of service-piper_with_linkerhand-ik-rbnx/roboarm_ik/solver.py:solve_flat.
     """
     from scipy.spatial.transform import Rotation as R
 

@@ -1,4 +1,4 @@
-# Public deploy config for robonix.service.roboarm.grasp_pose.
+# Public deploy config for robonix.service.piper_with_linkerhand.grasp_pose.
 # Values below are the ones this deploy uses; the type/unit/constraint note
 # above each key is the contract.
 config:
